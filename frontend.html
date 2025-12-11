@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌑 Web App Exploiter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background:  #0a0a0a;
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #1a1a1a;
+            border:  2px solid #ff0000;
+            border-radius:  10px;
+            padding:  40px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ff0000;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom:  30px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            background: #222;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        button:hover: not(:disabled) {
+            background: #cc0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        . loading {
+            text-align: center;
+            color: #00ff00;
+            font-size: 1.2em;
+            margin:  20px 0;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #666;
+            border-top: 3px solid #ff0000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .result-header {
+            background: #ff0000;
+            color: #fff;
+            padding: 15px;
+            border-radius:  5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        . error {
+            background: #330000;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            border-radius: 5px;
+            color: #ff6666;
+            margin-bottom:  20px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            background: #0f0f0f;
+            margin-bottom: 5px;
+        }
+
+        . stat: last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .section {
+            background: #0f0f0f;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            color: #ff0000;
+            font-size: 1.2em;
+            margin-bottom:  15px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .email-list {
+            max-height: 300px;
+            overflow-y:  auto;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+
+        .email-item {
+            padding: 8px;
+            background: #222;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            border-left: 3px solid #00ff00;
+            word-break: break-all;
+            color: #00ff00;
+        }
+
+        .vulnerability-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .vulnerability-item {
+            padding: 10px;
+            background: #330000;
+            margin-bottom: 8px;
+            border-radius:  3px;
+            border-left: 3px solid #ff0000;
+            font-size: 0.9em;
+        }
+
+        .severity-critical {
+            color: #ff0000;
+            font-weight:  bold;
+        }
+
+        . severity-high {
+            color:  #ff6600;
+            font-weight: bold;
+        }
+
+        .severity-medium {
+            color: #ffff00;
+        }
+
+        .severity-low {
+            color: #00ff00;
+        }
+
+        .copy-button {
+            background: #00ff00;
+            color:  #000;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .copy-button:hover {
+            background: #00cc00;
+        }
+
+        . footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            . input-section {
+                flex-direction: column;
+            }
+
+            input, button {
+                width: 100%;
+            }
+
+            .stat {
+                flex-direction: column;
+            }
+
+            .stat-value {
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌑 WEB APP EXPLOITER</h1>
+        <p class="subtitle">Aggressive Vulnerability Scanner & Data Extractor</p>
+
+        <div class="input-section">
+            <input 
+                type="text" 
+                id="domainInput" 
+                placeholder="Enter domain (e.g., example.com or https://example.com)"
+                onkeypress="handleKeyPress(event)"
+            >
+            <button onclick="exploit()">🔴 EXPLOIT</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Exploiting target...  This may take 1-3 minutes... </span>
+        </div>
+
+        <div class="results" id="results">
+            <div class="result-header" id="resultHeader"></div>
+
+            <div id="errorContainer"></div>
+
+            <div class="section">
+                <div class="section-title">📊 Summary Statistics</div>
+                <div class="stat">
+                    <span class="stat-label">Emails Extracted:</span>
+                    <span class="stat-value" id="emailCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total Data Points:</span>
+                    <span class="stat-value" id="dataCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Vulnerabilities Found:</span>
+                    <span class="stat-value" id="vulnCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Exploited Endpoints:</span>
+                    <span class="stat-value" id="endpointCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">API Keys Found:</span>
+                    <span class="stat-value" id="keyCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Severity Level:</span>
+                    <span class="stat-value" id="severity">UNKNOWN</span>
+                </div>
+            </div>
+
+            <div class="section" id="emailSection" style="display: none;">
+                <div class="section-title">📧 Extracted Emails <span id="emailCountBadge"></span></div>
+                <div class="email-list" id="emailList"></div>
+                <button class="copy-button" onclick="copyEmails()">📋 Copy All</button>
+            </div>
+
+            <div class="section" id="vulnSection" style="display: none;">
+                <div class="section-title">🚨 Vulnerabilities Found</div>
+                <div class="vulnerability-list" id="vulnList"></div>
+            </div>
+
+            <div class="section" id="endpointSection" style="display: none;">
+                <div class="section-title">🎯 Exploited Endpoints</div>
+                <div id="endpointList"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📋 Raw JSON Response</div>
+                <textarea readonly style="width: 100%; height:  300px; background: #222; color: #00ff00; border: 1px solid #333; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 0.9em;" id="rawResponse"></textarea>
+                <button class="copy-button" onclick="copyJSON()">📋 Copy JSON</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>⚠️ For authorized penetration testing only.  Unauthorized access is illegal.</p>
+            <p style="margin-top: 10px; color: #ff0000;">Backend: <span id="backendUrl">Loading...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Change this to your Render backend URL
+        const BACKEND_URL = 'https://pentest-lab-red-team.onrender.com';
+
+        // Display backend URL
+        document.getElementById('backendUrl').textContent = BACKEND_URL;
+
+        async function exploit() {
+            const domain = document.getElementById('domainInput').value.trim();
+
+            if (!domain) {
+                alert('Please enter a domain');
+                return;
+            }
+
+            // Clean domain input
+            const cleanDomain = domain.replace('https://', '').replace('http://', '').split('/')[0];
+
+            const button = event.target;
+            button.disabled = true;
+            
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/exploit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':  'application/json'
+                    },
+                    body: JSON.stringify({ domain: cleanDomain })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error:  ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('results').classList.add('active');
+                
+                const errorContainer = document.getElementById('errorContainer');
+                errorContainer.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+                
+                document.getElementById('resultHeader').textContent = '❌ EXPLOITATION FAILED';
+                document.getElementById('resultHeader').style.background = '#660000';
+            } finally {
+                button.disabled = false;
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.add('active');
+
+            // Update header
+            const header = document.getElementById('resultHeader');
+            header.textContent = `✅ EXPLOITATION COMPLETE - ${data.severity} RISK`;
+            header.style.background = getSeverityColor(data.severity);
+
+            // Update stats
+            document.getElementById('emailCount').textContent = data.extractedEmails?. length || 0;
+            document.getElementById('dataCount').textContent = data.totalDataPoints || 0;
+            document.getElementById('vulnCount').textContent = data.vulnerabilities?.length || 0;
+            document.getElementById('endpointCount').textContent = data.exploitedEndpoints?.length || 0;
+            document.getElementById('keyCount').textContent = data. apiKeys?.length || 0;
+            document.getElementById('severity').textContent = data.severity;
+
+            // Display emails
+            if (data.extractedEmails && data.extractedEmails.length > 0) {
+                document.getElementById('emailSection').style.display = 'block';
+                document.getElementById('emailCountBadge').textContent = `(${data.extractedEmails. length})`;
+                
+                const emailList = document.getElementById('emailList');
+                emailList.innerHTML = data.extractedEmails
+                    .map(email => `<div class="email-item">${email}</div>`)
+                    .join('');
+            }
+
+            // Display vulnerabilities
+            if (data.vulnerabilities && data.vulnerabilities.length > 0) {
+                document.getElementById('vulnSection').style.display = 'block';
+                
+                const vulnList = document. getElementById('vulnList');
+                vulnList.innerHTML = data. vulnerabilities
+                    .map(vuln => `
+                        <div class="vulnerability-item">
+                            <span class="severity-${vuln.severity. toLowerCase()}">
+                                [${vuln.severity}]
+                            </span>
+                            <strong>${vuln.type}</strong>
+                            ${vuln.endpoint ? ` - ${vuln.endpoint}` : ''}
+                            ${vuln.details ? `<br><small>${vuln.details}</small>` : ''}
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            // Display endpoints
+            if (data.exploitedEndpoints && data.exploitedEndpoints.length > 0) {
+                document.getElementById('endpointSection').style.display = 'block';
+                
+                const endpointList = document.getElementById('endpointList');
+                endpointList.innerHTML = data.exploitedEndpoints
+                    .map(ep => `
+                        <div class="email-item">
+                            <strong>${ep.type || ep.endpoint}</strong>
+                            ${ep.method ? ` (${ep.method})` : ''}
+                            ${ep.dataCount ? ` - ${ep.dataCount} items` : ''}
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            // Display raw JSON
+            document.getElementById('rawResponse').value = JSON.stringify(data, null, 2);
+        }
+
+        function getSeverityColor(severity) {
+            switch(severity) {
+                case 'CRITICAL': return '#ff0000';
+                case 'HIGH': return '#ff6600';
+                case 'MEDIUM': return '#ffff00';
+                case 'LOW': return '#00ff00';
+                default: return '#888';
+            }
+        }
+
+        function copyEmails() {
+            const emails = Array.from(document.querySelectorAll('.email-item'))
+                .map(el => el.textContent)
+                .join('\n');
+            
+            navigator.clipboard.writeText(emails).then(() => {
+                alert('✅ Emails copied to clipboard! ');
+            });
+        }
+
+        function copyJSON() {
+            const json = document.getElementById('rawResponse').value;
+            navigator.clipboard. writeText(json).then(() => {
+                alert('✅ JSON copied to clipboard!');
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                exploit();
+            }
+        }
+
+        // Test connection on load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                if (response.ok) {
+                    console.log('✅ Backend connected successfully');
+                } else {
+                    console.warn('⚠️ Backend returned status:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Cannot connect to backend:', error);
+                alert('⚠️ Warning: Cannot connect to backend at ' + BACKEND_URL + '\n\nMake sure your Render service is deployed and the URL is correct.');
+            }
+        });
+    </script>
+</body>
+</html>
